@@ -1,0 +1,12 @@
+2024-11-12 00:44:23.188762: Recommendation: coffee - Explanation: Утром рекомендуем кофе для любителей кофе
+2024-11-12 00:44:57.232792: Recommendation: coffee - Explanation: Утром рекомендуем кофе для любителей кофе
+2024-11-12 00:44:59.729414: Recommendation: coffee - Explanation: Утром рекомендуем кофе для любителей кофе
+2024-11-12 00:45:00.698459: Recommendation: coffee - Explanation: Утром рекомендуем кофе для любителей кофе
+2024-11-12 00:45:33.065687: Recommendation: tea - Explanation: Днем рекомендуем чай для любителей чая
+2024-11-12 00:46:41.375736: Recommendation: tea - Explanation: Днем рекомендуем чай для любителей чая
+2024-11-12 00:46:52.334526: Recommendation: tea - Explanation: Днем рекомендуем чай для любителей чая
+2024-11-12 00:50:55.302012: Recommendation: coffee - Explanation: Утром рекомендуем кофе для любителей кофе
+2024-11-12 00:51:25.427395: Recommendation: coffee - Explanation: Утром рекомендуем кофе для любителей кофе
+2024-11-12 00:51:51.665657: Recommendation: coffee - Explanation: Утром рекомендуем кофе для любителей кофе
+2024-11-12 00:52:20.217346: Recommendation: juice - Explanation: Вечером рекомендуем сок для любителей сока
+2024-11-12 00:52:31.872042: Recommendation: juice - Explanation: Вечером рекомендуем сок для любителей сока

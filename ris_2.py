@@ -111,7 +111,7 @@ expert_system.add_frame(table2)
 expert_system.add_frame(scenario)
 
 # Поиск по фреймам
-search_results = expert_system.search_frame("чай")
+search_results = expert_system.search_frame("паста")
 for result in search_results:
     print(result)
 

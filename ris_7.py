@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, simpledialog
 
 class Trainer:
     def __init__(self, name, experience, specialty):
@@ -9,9 +9,9 @@ class Trainer:
 
 
 class DietPlan:
-    def __init__(self, goal, recommended_calories, macros):
+    def __init__(self, goal, calorie_modifier, macros):
         self.goal = goal
-        self.recommended_calories = recommended_calories
+        self.calorie_modifier = calorie_modifier  # Модификатор калорийности
         self.macros = macros  # Пропорции макронутриентов (белки, жиры, углеводы)
 
 
@@ -21,6 +21,8 @@ class Exercise:
         self.target_muscle = target_muscle  # Задействуемые мышцы
         self.goal = goal  # Цель упражнения (похудение, набор массы и т.д.)
 
+
+# --- Данные для системы ---
 
 # Тренеры
 trainers = [
@@ -35,12 +37,12 @@ trainers = [
 
 # Режимы питания
 diet_plans = [
-    DietPlan("похудение", 1500, {"белки": 30, "жиры": 20, "углеводы": 50}),
-    DietPlan("набор массы", 3000, {"белки": 35, "жиры": 25, "углеводы": 40}),
-    DietPlan("поддержание формы", 2000, {"белки": 30, "жиры": 30, "углеводы": 40}),
-    DietPlan("сушка", 1600, {"белки": 45, "жиры": 20, "углеводы": 35}),
-    DietPlan("увеличение выносливости", 2500, {"белки": 25, "жиры": 20, "углеводы": 55}),
-    DietPlan("поддержка гибкости", 1800, {"белки": 20, "жиры": 30, "углеводы": 50})
+    DietPlan("похудение", -500, {"белки": 30, "жиры": 20, "углеводы": 50}),
+    DietPlan("набор массы", 500, {"белки": 35, "жиры": 25, "углеводы": 40}),
+    DietPlan("поддержание формы", 0, {"белки": 30, "жиры": 30, "углеводы": 40}),
+    DietPlan("сушка", -300, {"белки": 45, "жиры": 20, "углеводы": 35}),
+    DietPlan("увеличение выносливости", 200, {"белки": 25, "жиры": 20, "углеводы": 55}),
+    DietPlan("поддержка гибкости", 0, {"белки": 20, "жиры": 30, "углеводы": 50})
 ]
 
 # Упражнения
@@ -59,6 +61,16 @@ exercises = [
 ]
 
 
+# --- Основная логика экспертной системы ---
+
+def calculate_bmr(weight, height, age, gender):
+    """Расчет базового метаболизма (BMR) по формуле Миффлина-Сан Жеора."""
+    if gender == "мужской":
+        return 10 * weight + 6.25 * height - 5 * age + 5
+    else:
+        return 10 * weight + 6.25 * height - 5 * age - 161
+
+
 def find_trainer_by_specialty(goal):
     specialty_map = {
         "похудение": "кардио",
@@ -75,10 +87,11 @@ def find_trainer_by_specialty(goal):
     return "Тренер не найден."
 
 
-def find_diet_plan_by_goal(goal):
+def find_diet_plan_by_goal(bmr, goal):
     for plan in diet_plans:
         if plan.goal == goal:
-            return f"Калории: {plan.recommended_calories}, БЖУ: {plan.macros}"
+            total_calories = bmr + plan.calorie_modifier
+            return f"Калории: {total_calories}, БЖУ: {plan.macros}"
     return "Диета не найдена."
 
 
@@ -86,6 +99,8 @@ def find_exercises_by_goal(goal):
     relevant_exercises = [ex.name for ex in exercises if ex.goal == goal]
     return relevant_exercises if relevant_exercises else ["Упражнения не найдены"]
 
+
+# --- UI на tkinter ---
 
 class FitnessExpertSystemApp:
     def __init__(self, root):
@@ -95,6 +110,27 @@ class FitnessExpertSystemApp:
         # Заголовок
         self.label_title = tk.Label(root, text="Экспертная система для фитнес-зала", font=("Arial", 16))
         self.label_title.pack(pady=10)
+
+        # Поля ввода роста, веса, возраста, пола
+        self.label_height = tk.Label(root, text="Введите ваш рост (см):")
+        self.label_height.pack(pady=5)
+        self.entry_height = tk.Entry(root, width=10)
+        self.entry_height.pack(pady=5)
+
+        self.label_weight = tk.Label(root, text="Введите ваш вес (кг):")
+        self.label_weight.pack(pady=5)
+        self.entry_weight = tk.Entry(root, width=10)
+        self.entry_weight.pack(pady=5)
+
+        self.label_age = tk.Label(root, text="Введите ваш возраст (лет):")
+        self.label_age.pack(pady=5)
+        self.entry_age = tk.Entry(root, width=10)
+        self.entry_age.pack(pady=5)
+
+        self.label_gender = tk.Label(root, text="Ваш пол (мужской/женский):")
+        self.label_gender.pack(pady=5)
+        self.entry_gender = tk.Entry(root, width=10)
+        self.entry_gender.pack(pady=5)
 
         # Поле ввода цели
         self.label_goal = tk.Label(root,
@@ -108,21 +144,37 @@ class FitnessExpertSystemApp:
         self.button_run.pack(pady=10)
 
     def get_recommendations(self):
-        goal = self.entry_goal.get().strip().lower()
+        # Получаем данные от пользователя
+        try:
+            height = float(self.entry_height.get())
+            weight = float(self.entry_weight.get())
+            age = int(self.entry_age.get())
+            gender = self.entry_gender.get().strip().lower()
+            goal = self.entry_goal.get().strip().lower()
 
-        # Получаем рекомендации
-        trainer = find_trainer_by_specialty(goal)
-        diet_plan = find_diet_plan_by_goal(goal)
-        exercises = find_exercises_by_goal(goal)
+            # Проверка пола
+            if gender not in ["мужской", "женский"]:
+                raise ValueError("Пол должен быть 'мужской' или 'женский'.")
 
-        # Формируем сообщение
-        result_message = f"Цель: {goal.capitalize()}\n\n"
-        result_message += f"Рекомендуемый тренер: {trainer}\n\n"
-        result_message += f"Режим питания: {diet_plan}\n\n"
-        result_message += "Рекомендуемые упражнения:\n" + "\n".join(f"- {ex}" for ex in exercises)
+            # Расчет BMR
+            bmr = calculate_bmr(weight, height, age, gender)
 
-        # Отображаем результат
-        messagebox.showinfo("Рекомендации", result_message)
+            # Получаем рекомендации
+            trainer = find_trainer_by_specialty(goal)
+            diet_plan = find_diet_plan_by_goal(bmr, goal)
+            exercises = find_exercises_by_goal(goal)
+
+            # Формируем сообщение
+            result_message = f"Ваш BMR: {bmr:.2f} ккал\n\n"
+            result_message += f"Цель: {goal.capitalize()}\n\n"
+            result_message += f"Рекомендуемый тренер: {trainer}\n\n"
+            result_message += f"Режим питания: {diet_plan}\n\n"
+            result_message += "Рекомендуемые упражнения:\n" + "\n".join(f"- {ex}" for ex in exercises)
+
+            # Отображаем результат
+            messagebox.showinfo("Рекомендации", result_message)
+        except ValueError as e:
+            messagebox.showerror("Ошибка", f"Ошибка ввода данных: {e}")
 
 
 # Запуск приложения

@@ -1,91 +1,85 @@
 import tkinter as tk
-from tkinter import messagebox, simpledialog
+from tkinter import messagebox, ttk
+
+# --- Основные классы ---
 
 class Trainer:
     def __init__(self, name, experience, specialty):
         self.name = name
-        self.experience = experience  # Опыт в годах
-        self.specialty = specialty  # Специализация (кардио, силовые тренировки и т.д.)
-
+        self.experience = experience
+        self.specialty = specialty
 
 class DietPlan:
     def __init__(self, goal, calorie_modifier, macros):
         self.goal = goal
-        self.calorie_modifier = calorie_modifier  # Модификатор калорийности
-        self.macros = macros  # Пропорции макронутриентов (белки, жиры, углеводы)
-
+        self.calorie_modifier = calorie_modifier
+        self.macros = macros
 
 class Exercise:
-    def __init__(self, name, target_muscle, goal):
+    def __init__(self, name, target_muscle, goal, level, sets, reps):
         self.name = name
-        self.target_muscle = target_muscle  # Задействуемые мышцы
-        self.goal = goal  # Цель упражнения (похудение, набор массы и т.д.)
+        self.target_muscle = target_muscle
+        self.goal = goal
+        self.level = level
+        self.sets = sets
+        self.reps = reps
 
+# --- Данные ---
 
-# --- Данные для системы ---
-
-# Тренеры
 trainers = [
     Trainer("Анна", 5, "кардио"),
     Trainer("Иван", 8, "силовые тренировки"),
     Trainer("Ольга", 4, "функциональные тренировки"),
-    Trainer("Дмитрий", 10, "набор массы"),
-    Trainer("Мария", 6, "гибкость и растяжка"),
-    Trainer("Сергей", 7, "выносливость"),
-    Trainer("Алексей", 3, "поддержание формы")
+    Trainer("Михаил", 10, "выносливость"),
+    Trainer("Дарья", 6, "йога и растяжка"),
+    Trainer("Алексей", 7, "общая физическая подготовка"),
 ]
 
-# Режимы питания
 diet_plans = [
     DietPlan("похудение", -500, {"белки": 30, "жиры": 20, "углеводы": 50}),
     DietPlan("набор массы", 500, {"белки": 35, "жиры": 25, "углеводы": 40}),
     DietPlan("поддержание формы", 0, {"белки": 30, "жиры": 30, "углеводы": 40}),
-    DietPlan("сушка", -300, {"белки": 45, "жиры": 20, "углеводы": 35}),
     DietPlan("увеличение выносливости", 200, {"белки": 25, "жиры": 20, "углеводы": 55}),
-    DietPlan("поддержка гибкости", 0, {"белки": 20, "жиры": 30, "углеводы": 50})
 ]
 
-# Упражнения
 exercises = [
-    Exercise("Бег", "сердечно-сосудистая система", "похудение"),
-    Exercise("Жим лежа", "грудные мышцы", "набор массы"),
-    Exercise("Приседания", "ягодицы и ноги", "набор массы"),
-    Exercise("Планка", "корпус", "поддержание формы"),
-    Exercise("Велотренажер", "сердечно-сосудистая система", "увеличение выносливости"),
-    Exercise("Йога", "гибкость", "поддержка гибкости"),
-    Exercise("Подтягивания", "спина", "набор массы"),
-    Exercise("Скакалка", "сердечно-сосудистая система", "похудение"),
-    Exercise("Мертвая тяга", "ягодицы и ноги", "набор массы"),
-    Exercise("Прыжки на месте", "выносливость", "увеличение выносливости"),
-    Exercise("Растяжка", "гибкость", "поддержка гибкости")
+    # Новичок
+    Exercise("Бег", "сердечно-сосудистая система", "похудение", "новичок", 3, 10),
+    Exercise("Планка", "корпус", "поддержание формы", "новичок", 3, "30 секунд"),
+    Exercise("Приседания без веса", "ноги", "похудение", "новичок", 3, 12),
+    Exercise("Растяжка спины", "спина", "поддержание формы", "новичок", 2, "1 минута"),
+    # Любитель
+    Exercise("Жим лёжа", "грудные мышцы", "набор массы", "любитель", 4, 12),
+    Exercise("Подтягивания", "спина и бицепс", "увеличение выносливости", "любитель", 3, 10),
+    Exercise("Прыжки на месте", "сердечно-сосудистая система", "увеличение выносливости", "любитель", 3, "1 минута"),
+    Exercise("Приседания с весом", "ягодицы и ноги", "набор массы", "любитель", 4, 10),
+    # Профессионал
+    Exercise("Мёртвая тяга", "спина и ноги", "набор массы", "профессионал", 5, 8),
+    Exercise("Бёрпи", "всё тело", "увеличение выносливости", "профессионал", 3, 15),
+    Exercise("Становая тяга", "спина и ягодицы", "поддержание формы", "профессионал", 5, 10),
+    Exercise("Подъём штанги", "бицепс", "набор массы", "профессионал", 4, 12),
 ]
 
-
-# --- Основная логика экспертной системы ---
+# --- Логика системы ---
 
 def calculate_bmr(weight, height, age, gender):
-    """Расчет базового метаболизма (BMR) по формуле Миффлина-Сан Жеора."""
     if gender == "мужской":
         return 10 * weight + 6.25 * height - 5 * age + 5
     else:
         return 10 * weight + 6.25 * height - 5 * age - 161
 
-
 def find_trainer_by_specialty(goal):
     specialty_map = {
         "похудение": "кардио",
         "набор массы": "силовые тренировки",
-        "поддержание формы": "функциональные тренировки",
-        "сушка": "функциональные тренировки",
+        "поддержание формы": "общая физическая подготовка",
         "увеличение выносливости": "выносливость",
-        "поддержка гибкости": "гибкость и растяжка"
     }
-    specialty = specialty_map.get(goal)
+    specialty = specialty_map.get(goal, "")
     for trainer in trainers:
         if trainer.specialty == specialty:
             return f"{trainer.name} (опыт: {trainer.experience} лет)"
     return "Тренер не найден."
-
 
 def find_diet_plan_by_goal(bmr, goal):
     for plan in diet_plans:
@@ -94,88 +88,84 @@ def find_diet_plan_by_goal(bmr, goal):
             return f"Калории: {total_calories}, БЖУ: {plan.macros}"
     return "Диета не найдена."
 
+def find_exercises_by_goal(goal, level):
+    relevant_exercises = [
+        ex for ex in exercises if ex.goal == goal and ex.level == level
+    ]
+    return relevant_exercises if relevant_exercises else []
 
-def find_exercises_by_goal(goal):
-    relevant_exercises = [ex.name for ex in exercises if ex.goal == goal]
-    return relevant_exercises if relevant_exercises else ["Упражнения не найдены"]
-
-
-# --- UI на tkinter ---
+# --- UI на ttk ---
 
 class FitnessExpertSystemApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Экспертная система для фитнес-зала")
+        self.root.geometry("600x600")
 
-        # Заголовок
-        self.label_title = tk.Label(root, text="Экспертная система для фитнес-зала", font=("Arial", 16))
-        self.label_title.pack(pady=10)
+        style = ttk.Style()
+        style.theme_use("clam")
+        style.configure("TLabel", font=("Arial", 12))
+        style.configure("TButton", font=("Arial", 12))
 
-        # Поля ввода роста, веса, возраста, пола
-        self.label_height = tk.Label(root, text="Введите ваш рост (см):")
-        self.label_height.pack(pady=5)
-        self.entry_height = tk.Entry(root, width=10)
-        self.entry_height.pack(pady=5)
+        ttk.Label(root, text="Экспертная система для фитнес-зала", font=("Arial", 16)).pack(pady=10)
 
-        self.label_weight = tk.Label(root, text="Введите ваш вес (кг):")
-        self.label_weight.pack(pady=5)
-        self.entry_weight = tk.Entry(root, width=10)
-        self.entry_weight.pack(pady=5)
+        self.create_input_fields(root)
+        ttk.Button(root, text="Получить рекомендации", command=self.get_recommendations).pack(pady=20)
 
-        self.label_age = tk.Label(root, text="Введите ваш возраст (лет):")
-        self.label_age.pack(pady=5)
-        self.entry_age = tk.Entry(root, width=10)
-        self.entry_age.pack(pady=5)
+    def create_input_fields(self, root):
+        frame = ttk.Frame(root)
+        frame.pack(pady=10)
 
-        self.label_gender = tk.Label(root, text="Ваш пол (мужской/женский):")
-        self.label_gender.pack(pady=5)
-        self.entry_gender = tk.Entry(root, width=10)
-        self.entry_gender.pack(pady=5)
+        # Поля для выбора роста, веса и возраста
+        ttk.Label(frame, text="Рост (см):").grid(row=0, column=0, padx=5, pady=5)
+        self.height_var = tk.IntVar(value=170)
+        ttk.Spinbox(frame, from_=100, to=250, textvariable=self.height_var, width=10).grid(row=0, column=1, padx=5, pady=5)
 
-        # Поле ввода цели
-        self.label_goal = tk.Label(root,
-                                   text="Введите вашу цель (похудение, набор массы, поддержание формы, сушка, увеличение выносливости, поддержка гибкости):")
-        self.label_goal.pack(pady=5)
-        self.entry_goal = tk.Entry(root, width=50)
-        self.entry_goal.pack(pady=5)
+        ttk.Label(frame, text="Вес (кг):").grid(row=1, column=0, padx=5, pady=5)
+        self.weight_var = tk.IntVar(value=70)
+        ttk.Spinbox(frame, from_=30, to=200, textvariable=self.weight_var, width=10).grid(row=1, column=1, padx=5, pady=5)
 
-        # Кнопка запуска
-        self.button_run = tk.Button(root, text="Получить рекомендации", command=self.get_recommendations)
-        self.button_run.pack(pady=10)
+        ttk.Label(frame, text="Возраст (лет):").grid(row=2, column=0, padx=5, pady=5)
+        self.age_var = tk.IntVar(value=25)
+        ttk.Spinbox(frame, from_=10, to=100, textvariable=self.age_var, width=10).grid(row=2, column=1, padx=5, pady=5)
+
+        # Пол и цель через выпадающие списки
+        ttk.Label(frame, text="Пол:").grid(row=3, column=0, padx=5, pady=5)
+        self.gender_var = tk.StringVar(value="мужской")
+        ttk.Combobox(frame, textvariable=self.gender_var, values=["мужской", "женский"], state="readonly", width=15).grid(row=3, column=1, padx=5, pady=5)
+
+        ttk.Label(frame, text="Цель:").grid(row=4, column=0, padx=5, pady=5)
+        self.goal_var = tk.StringVar(value="похудение")
+        ttk.Combobox(frame, textvariable=self.goal_var, values=["похудение", "набор массы", "поддержание формы", "увеличение выносливости"], state="readonly", width=30).grid(row=4, column=1, padx=5, pady=5)
+
+        ttk.Label(frame, text="Уровень:").grid(row=5, column=0, padx=5, pady=5)
+        self.level_var = tk.StringVar(value="новичок")
+        ttk.Combobox(frame, textvariable=self.level_var, values=["новичок", "любитель", "профессионал"], state="readonly", width=20).grid(row=5, column=1, padx=5, pady=5)
 
     def get_recommendations(self):
-        # Получаем данные от пользователя
         try:
-            height = float(self.entry_height.get())
-            weight = float(self.entry_weight.get())
-            age = int(self.entry_age.get())
-            gender = self.entry_gender.get().strip().lower()
-            goal = self.entry_goal.get().strip().lower()
+            height = self.height_var.get()
+            weight = self.weight_var.get()
+            age = self.age_var.get()
+            gender = self.gender_var.get()
+            goal = self.goal_var.get()
+            level = self.level_var.get()
 
-            # Проверка пола
-            if gender not in ["мужской", "женский"]:
-                raise ValueError("Пол должен быть 'мужской' или 'женский'.")
-
-            # Расчет BMR
             bmr = calculate_bmr(weight, height, age, gender)
-
-            # Получаем рекомендации
             trainer = find_trainer_by_specialty(goal)
             diet_plan = find_diet_plan_by_goal(bmr, goal)
-            exercises = find_exercises_by_goal(goal)
+            exercises = find_exercises_by_goal(goal, level)
 
-            # Формируем сообщение
-            result_message = f"Ваш BMR: {bmr:.2f} ккал\n\n"
-            result_message += f"Цель: {goal.capitalize()}\n\n"
-            result_message += f"Рекомендуемый тренер: {trainer}\n\n"
-            result_message += f"Режим питания: {diet_plan}\n\n"
-            result_message += "Рекомендуемые упражнения:\n" + "\n".join(f"- {ex}" for ex in exercises)
+            result_message = f"Ваш BMR: {bmr:.2f} ккал\n"
+            result_message += f"Рекомендуемый тренер: {trainer}\n"
+            result_message += f"Режим питания: {diet_plan}\n"
+            result_message += "Рекомендуемые упражнения:\n"
+            for ex in exercises:
+                result_message += f"- {ex.name} ({ex.target_muscle}): {ex.sets}x{ex.reps}\n"
 
-            # Отображаем результат
             messagebox.showinfo("Рекомендации", result_message)
         except ValueError as e:
-            messagebox.showerror("Ошибка", f"Ошибка ввода данных: {e}")
-
+            messagebox.showerror("Ошибка", str(e))
 
 # Запуск приложения
 if __name__ == "__main__":

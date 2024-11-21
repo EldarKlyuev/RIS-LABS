@@ -1,9 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
 
-
-# --- Основные классы для экспертной системы ---
-
 class Trainer:
     def __init__(self, name, experience, specialty):
         self.name = name
@@ -24,8 +21,6 @@ class Exercise:
         self.target_muscle = target_muscle  # Задействуемые мышцы
         self.goal = goal  # Цель упражнения (похудение, набор массы и т.д.)
 
-
-# --- Данные для системы ---
 
 # Тренеры
 trainers = [
@@ -64,8 +59,6 @@ exercises = [
 ]
 
 
-# --- Основная логика экспертной системы ---
-
 def find_trainer_by_specialty(goal):
     specialty_map = {
         "похудение": "кардио",
@@ -93,8 +86,6 @@ def find_exercises_by_goal(goal):
     relevant_exercises = [ex.name for ex in exercises if ex.goal == goal]
     return relevant_exercises if relevant_exercises else ["Упражнения не найдены"]
 
-
-# --- UI на tkinter ---
 
 class FitnessExpertSystemApp:
     def __init__(self, root):

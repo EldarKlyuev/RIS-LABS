@@ -33,6 +33,7 @@ tabControl.pack(expand=1, fill="both")
 
 # Функция для прогноза денежных потоков
 def forecast_cash_flow():
+    # Прогнозирование с использованием ARIMA
     cash_flow = data['cash_flow']
     model = ARIMA(cash_flow, order=(1, 1, 1))
     arima_model = model.fit()
@@ -50,20 +51,53 @@ forecast_button.pack(pady=10)
 # Функция для оптимизации бюджета
 def optimize_budget():
     try:
+        # Получаем значения затрат от пользователя
         production_cost = float(entry_production_cost.get())
         labor_cost = float(entry_labor_cost.get())
         materials_cost = float(entry_materials_cost.get())
 
+        # Создаем DataFrame с будущими затратами
         future_costs = pd.DataFrame({
             'production_cost': [production_cost],
             'labor_cost': [labor_cost],
             'materials_cost': [materials_cost]
         })
 
+        # Прогнозируем общие расходы с использованием линейной регрессии
         predicted_expenses = model.predict(future_costs)
-        messagebox.showinfo("Прогнозируемые расходы", f"Прогнозируемые расходы: {predicted_expenses[0]}")
+
+        # Выводим прогнозируемые расходы
+        messagebox.showinfo("Прогнозируемые расходы", f"Прогнозируемые расходы: {predicted_expenses[0]:,.2f}")
+
+        # Логика оптимизации бюджета (например, минимизация расходов при заданных ограничениях)
+        # Здесь задаем целевые ограничения (например, минимизация производственных затрат, если это необходимо)
+        target_expenses = 100000  # Например, максимальные ожидаемые расходы
+
+        # Пример оптимизации (предположим, что нам нужно минимизировать производственные затраты, сохраняя общие расходы в пределах target_expenses)
+        optimized_production_cost = target_expenses - (labor_cost + materials_cost)
+        if optimized_production_cost < 0:
+            optimized_production_cost = 0  # Убедимся, что не будет отрицательных значений
+
+        optimized_expenses = optimized_production_cost + labor_cost + materials_cost
+
+        # Выводим результаты оптимизации
+        messagebox.showinfo("Оптимизация бюджета",
+                            f"Оптимизированные производственные затраты: {optimized_production_cost:,.2f}\n"
+                            f"Общие оптимизированные расходы: {optimized_expenses:,.2f}")
+
+        # Графическое представление результатов оптимизации
+        labels = ['Производственные затраты', 'Затраты на рабочую силу', 'Затраты на материалы',
+                  'Оптимизированные производственные затраты']
+        values = [production_cost, labor_cost, materials_cost, optimized_production_cost]
+
+        plt.figure(figsize=(8, 5))
+        plt.bar(labels, values, color=['blue', 'orange', 'green', 'red'])
+        plt.title("Сравнение затрат до и после оптимизации")
+        plt.ylabel("Затраты")
+        plt.show()
+
     except ValueError:
-        messagebox.showerror("Ошибка", "Введите числовые значения.")
+        messagebox.showerror("Ошибка", "Введите числовые значения для всех затрат.")
 
 
 # Вкладка Оптимизации бюджета

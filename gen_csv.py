@@ -1,25 +1,22 @@
 import pandas as pd
 import numpy as np
 
-# Генерация данных
+# Установка параметров для генерации данных
 np.random.seed(42)
+n_samples = 100
 
+# Генерация данных
 data = {
-    'cash_flow': np.random.randint(50000, 150000, size=24),  # Денежные потоки за 24 месяца
-    'production_cost': np.random.randint(80000, 120000, size=24),  # Затраты на производство
-    'labor_cost': np.random.randint(30000, 50000, size=24),  # Затраты на оплату труда
-    'materials_cost': np.random.randint(20000, 40000, size=24),  # Затраты на материалы
-    'total_expenses': np.random.randint(150000, 200000, size=24),  # Общие расходы
-    'current_assets': np.random.randint(200000, 400000, size=24),  # Оборотные активы
-    'current_liabilities': np.random.randint(100000, 200000, size=24),  # Текущие обязательства
-    'total_debt': np.random.randint(500000, 800000, size=24),  # Общий долг
-    'equity': np.random.randint(300000, 600000, size=24)  # Собственный капитал
+    "development_cost": np.random.normal(200000, 30000, n_samples),
+    "marketing_cost": np.random.normal(100000, 20000, n_samples),
+    "infrastructure_cost": np.random.normal(50000, 15000, n_samples),
+    "cash_flow": np.random.normal(300000, 50000, n_samples),
 }
+data["total_expenses"] = data["development_cost"] + data["marketing_cost"] + data["infrastructure_cost"]
 
-# Создание DataFrame
+# Преобразование в DataFrame
 df = pd.DataFrame(data)
 
-# Сохранение в CSV
-df.to_csv("financial_data.csv", index=False)
-
-print("Датасет сохранен в файл 'financial_data.csv'")
+# Сохранение в файл
+file_path = "it_financial_data.csv"
+df.to_csv(file_path, index=False)

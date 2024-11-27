@@ -7,18 +7,18 @@ from statsmodels.tsa.arima.model import ARIMA
 import matplotlib.pyplot as plt
 
 # Загрузка данных
-data = pd.read_csv("financial_data.csv")
+data = pd.read_csv("it_financial_data.csv")
 
 # Инициализация модели линейной регрессии
-X = data[['production_cost', 'labor_cost', 'materials_cost']]
+X = data[['development_cost', 'marketing_cost', 'infrastructure_cost']]
 y = data['total_expenses']
 model = LinearRegression()
 model.fit(X, y)
 
 # Настройка окна tkinter
 root = Tk()
-root.title("Экспертная система финансового планирования")
-root.geometry("600x400")
+root.title("Экспертная система финансового планирования в ИТ")
+root.geometry("700x500")
 
 # Создание вкладок
 tabControl = ttk.Notebook(root)
@@ -33,12 +33,36 @@ tabControl.pack(expand=1, fill="both")
 
 # Функция для прогноза денежных потоков
 def forecast_cash_flow():
-    # Прогнозирование с использованием ARIMA
-    cash_flow = data['cash_flow']
-    model = ARIMA(cash_flow, order=(1, 1, 1))
-    arima_model = model.fit()
-    forecast = arima_model.forecast(steps=12)
-    messagebox.showinfo("Прогноз", f"Прогноз денежных потоков на 12 месяцев: {forecast}")
+    try:
+        # Обработка данных
+        cash_flow = data['cash_flow']
+
+        # Прогнозирование с использованием ARIMA
+        model = ARIMA(cash_flow, order=(2, 1, 2))  # Параметры модели подобраны для примера
+        arima_model = model.fit()
+
+        # Прогноз на 12 месяцев
+        forecast = arima_model.forecast(steps=12)
+
+        # Создание дат для прогноза
+        dates = pd.date_range(start='2023-12-01', periods=12, freq='ME')
+        forecast_df = pd.DataFrame({'Дата': dates, 'Прогноз': forecast})
+
+        # Отображение прогноза
+        plt.figure(figsize=(10, 6))
+        plt.plot(cash_flow, label='Исторический денежный поток')
+        plt.plot(range(len(cash_flow), len(cash_flow) + 12), forecast, label='Прогноз', color='red')
+        plt.legend()
+        plt.title("Прогноз денежных потоков")
+        plt.xlabel("Месяцы")
+        plt.ylabel("Денежный поток")
+        plt.grid(True)
+        plt.show()
+
+        messagebox.showinfo("Прогноз",
+                            f"Прогноз денежных потоков на 12 месяцев:\n{forecast_df.to_string(index=False)}")
+    except Exception as e:
+        messagebox.showerror("Ошибка", f"Ошибка в прогнозировании: {e}")
 
 
 # Вкладка Прогнозирования
@@ -52,15 +76,15 @@ forecast_button.pack(pady=10)
 def optimize_budget():
     try:
         # Получаем значения затрат от пользователя
-        production_cost = float(entry_production_cost.get())
-        labor_cost = float(entry_labor_cost.get())
-        materials_cost = float(entry_materials_cost.get())
+        development_cost = float(entry_development_cost.get())
+        marketing_cost = float(entry_marketing_cost.get())
+        infrastructure_cost = float(entry_infrastructure_cost.get())
 
         # Создаем DataFrame с будущими затратами
         future_costs = pd.DataFrame({
-            'production_cost': [production_cost],
-            'labor_cost': [labor_cost],
-            'materials_cost': [materials_cost]
+            'development_cost': [development_cost],
+            'marketing_cost': [marketing_cost],
+            'infrastructure_cost': [infrastructure_cost]
         })
 
         # Прогнозируем общие расходы с использованием линейной регрессии
@@ -69,26 +93,23 @@ def optimize_budget():
         # Выводим прогнозируемые расходы
         messagebox.showinfo("Прогнозируемые расходы", f"Прогнозируемые расходы: {predicted_expenses[0]:,.2f}")
 
-        # Логика оптимизации бюджета (например, минимизация расходов при заданных ограничениях)
-        # Здесь задаем целевые ограничения (например, минимизация производственных затрат, если это необходимо)
-        target_expenses = 100000  # Например, максимальные ожидаемые расходы
+        # Логика оптимизации бюджета
+        target_expenses = 500000  # Максимально допустимые расходы
 
-        # Пример оптимизации (предположим, что нам нужно минимизировать производственные затраты, сохраняя общие расходы в пределах target_expenses)
-        optimized_production_cost = target_expenses - (labor_cost + materials_cost)
-        if optimized_production_cost < 0:
-            optimized_production_cost = 0  # Убедимся, что не будет отрицательных значений
+        optimized_development_cost = target_expenses - (marketing_cost + infrastructure_cost)
+        if optimized_development_cost < 0:
+            optimized_development_cost = 0
 
-        optimized_expenses = optimized_production_cost + labor_cost + materials_cost
+        optimized_expenses = optimized_development_cost + marketing_cost + infrastructure_cost
 
         # Выводим результаты оптимизации
         messagebox.showinfo("Оптимизация бюджета",
-                            f"Оптимизированные производственные затраты: {optimized_production_cost:,.2f}\n"
+                            f"Оптимизированные затраты на разработку: {optimized_development_cost:,.2f}\n"
                             f"Общие оптимизированные расходы: {optimized_expenses:,.2f}")
 
-        # Графическое представление результатов оптимизации
-        labels = ['Производственные затраты', 'Затраты на рабочую силу', 'Затраты на материалы',
-                  'Оптимизированные производственные затраты']
-        values = [production_cost, labor_cost, materials_cost, optimized_production_cost]
+        # Графическое представление результатов
+        labels = ['Разработка ПО', 'Маркетинг', 'Инфраструктура', 'Оптимизированная разработка']
+        values = [development_cost, marketing_cost, infrastructure_cost, optimized_development_cost]
 
         plt.figure(figsize=(8, 5))
         plt.bar(labels, values, color=['blue', 'orange', 'green', 'red'])
@@ -102,15 +123,15 @@ def optimize_budget():
 
 # Вкладка Оптимизации бюджета
 Label(tab_budget, text="Оптимизация бюджета", font=("Arial", 14)).pack(pady=10)
-Label(tab_budget, text="Стоимость производства:").pack()
-entry_production_cost = Entry(tab_budget)
-entry_production_cost.pack()
-Label(tab_budget, text="Затраты на рабочую силу:").pack()
-entry_labor_cost = Entry(tab_budget)
-entry_labor_cost.pack()
-Label(tab_budget, text="Стоимость материалов:").pack()
-entry_materials_cost = Entry(tab_budget)
-entry_materials_cost.pack()
+Label(tab_budget, text="Затраты на разработку ПО:").pack()
+entry_development_cost = Entry(tab_budget)
+entry_development_cost.pack()
+Label(tab_budget, text="Затраты на маркетинг:").pack()
+entry_marketing_cost = Entry(tab_budget)
+entry_marketing_cost.pack()
+Label(tab_budget, text="Затраты на инфраструктуру:").pack()
+entry_infrastructure_cost = Entry(tab_budget)
+entry_infrastructure_cost.pack()
 optimize_button = Button(tab_budget, text="Рассчитать расходы", command=optimize_budget)
 optimize_button.pack(pady=10)
 
@@ -121,16 +142,16 @@ def risk_analysis():
     forecast_values = []
 
     for i in range(iterations):
-        production_cost = np.random.normal(100000, 10000)
-        labor_cost = np.random.normal(50000, 8000)
-        materials_cost = np.random.normal(30000, 5000)
-        total_expenses = production_cost + labor_cost + materials_cost
+        development_cost = np.random.normal(200000, 30000)
+        marketing_cost = np.random.normal(100000, 15000)
+        infrastructure_cost = np.random.normal(50000, 10000)
+        total_expenses = development_cost + marketing_cost + infrastructure_cost
         forecast_values.append(total_expenses)
 
     plt.hist(forecast_values, bins=50, color='skyblue')
     plt.xlabel('Общие расходы')
     plt.ylabel('Частота')
-    plt.title('Анализ риска на основе Монте-Карло')
+    plt.title('Анализ риска на основе Монте-Карло для ИТ')
     plt.show()
 
 
